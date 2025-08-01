@@ -76,6 +76,18 @@
       color: #000;
       cursor: pointer;
     }
+    #pizzaPopup {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #fff;
+      color: #000;
+      padding: 20px;
+      border-radius: 12px;
+      z-index: 999;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
   </style>
 </head>
 <body>
@@ -98,6 +110,13 @@
         <button class="mic-button">🎙 Начать говорить</button>
       </div>
     </div>
+  </div>
+
+  <!-- 🍕 Всплывающее окно пиццы -->
+  <div id="pizzaPopup">
+    <h3>🍕 Братюнь, зацени пиццу!</h3>
+    <p>Тут самые кайфовые пиццухи. Что выбираем?</p>
+    <button onclick="hidePizzaPopup()">Закрыть</button>
   </div>
 
   <script>
@@ -133,13 +152,17 @@
       fetch(OPENAI_PROXY_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages, userId, mode: "text" })
+        body: JSON.stringify({ messages, userId, mode: "pizza" })
       })
       .then(res => res.json())
       .then(data => {
         const reply = data?.choices?.[0]?.message?.content || "Ошибка";
         appendMessage(reply, false);
         messages.push({ role: "assistant", content: reply });
+
+        if (data.choices?.[0]?.message?.triggerPizzaPopup) {
+          showPizzaPopup();
+        }
       })
       .catch(err => {
         appendMessage("Ошибка запроса", false);
@@ -203,6 +226,14 @@
         audio.play();
       })
       .catch(err => console.error("Ошибка озвучки:", err));
+    }
+
+    function showPizzaPopup() {
+      document.getElementById("pizzaPopup").style.display = "block";
+    }
+
+    function hidePizzaPopup() {
+      document.getElementById("pizzaPopup").style.display = "none";
     }
   </script>
 </body>
