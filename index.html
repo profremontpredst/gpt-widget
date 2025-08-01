@@ -235,6 +235,15 @@
     function hidePizzaPopup() {
       document.getElementById("pizzaPopup").style.display = "none";
     }
+    window.addEventListener("load", () => {
+  setTimeout(() => {
+    if (messages.length === 0) {
+      const welcomeMessage = "Давай помогу 🙌";
+      appendMessage(welcomeMessage, false);
+      messages.push({ role: "assistant", content: welcomeMessage });
+    }
+  }, 5000);
+});
   </script>
 </body>
 </html>
