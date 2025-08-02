@@ -141,13 +141,22 @@ button {
     <button onclick="startTextVoice()">🎤</button>
   </div>
 </div>
-    <div class="chat-window" id="voice-chat">
-      <div id="voice-status" style="padding: 15px; font-size: 14px;">Нажмите на микрофон, чтобы начать</div>
-      <div style="text-align:center;">
-        <button class="mic-button">🎙 Начать говорить</button>
-      </div>
-    </div>
+    <div class="chat-window" id="voice-chat" style="display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px;">
+  <div id="visualizer" style="display: flex; gap: 4px; margin-bottom: 20px;">
+    <div style="width: 4px; height: 30px; background: cyan;"></div>
+    <div style="width: 4px; height: 30px; background: cyan;"></div>
+    <div style="width: 4px; height: 30px; background: cyan;"></div>
+    <div style="width: 4px; height: 30px; background: cyan;"></div>
+    <div style="width: 4px; height: 30px; background: cyan;"></div>
+    <div style="width: 4px; height: 30px; background: cyan;"></div>
+    <div style="width: 4px; height: 30px; background: cyan;"></div>
+    <div style="width: 4px; height: 30px; background: cyan;"></div>
+    <div style="width: 4px; height: 30px; background: cyan;"></div>
+    <div style="width: 4px; height: 30px; background: cyan;"></div>
   </div>
+  <button class="mic-button">🎙 Начать говорить</button>
+  <div id="voice-status" style="padding-top: 10px; font-size: 14px;">Нажмите на микрофон, чтобы начать</div>
+</div>
 
   <script>
     const OPENAI_PROXY_URL = "https://openai-gpt-proxy-sdox.onrender.com/gpt";
@@ -273,5 +282,77 @@ button {
       }, 5000);
     });
   </script>
+    <script>
+let visualizerBars = [];
+let visualizerInterval;
+
+function startEqualizer() {
+  if (visualizerBars.length === 0) {
+    visualizerBars = document.querySelectorAll("#visualizer div");
+  }
+  visualizerInterval = setInterval(() => {
+    visualizerBars.forEach(bar => {
+      const height = Math.random() * 40 + 10;
+      bar.style.height = `${height}px`;
+    });
+  }, 100);
+}
+
+function stopEqualizer() {
+  clearInterval(visualizerInterval);
+  visualizerBars.forEach(bar => {
+    bar.style.height = `30px`;
+  });
+}
+
+// Подрубаем эквалайзер на старте речи и озвучке
+micButton.addEventListener("click", () => {
+  startEqualizer();
+  const status = document.getElementById("voice-status");
+  status.innerText = "Говорите...";
+  const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  recognition.lang = "ru-RU";
+  recognition.start();
+  recognition.onresult = async (event) => {
+    stopEqualizer();
+    const text = event.results[0][0].transcript;
+    status.innerText = "🗣 " + text;
+    startEqualizer();
+    const res = await fetch(OPENAI_PROXY_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages: [{ role: "user", content: text }], userId, mode: "voice" })
+    });
+    const data = await res.json();
+    const reply = data?.choices?.[0]?.message?.content || "Ошибка";
+    stopEqualizer();
+    speakText(reply);
+  };
+  recognition.onerror = () => {
+    stopEqualizer();
+    status.innerText = "Ошибка распознавания";
+  };
+});
+
+function speakText(text) {
+  startEqualizer();
+  fetch(ELEVENLABS_STREAM_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text })
+  })
+  .then(res => res.blob())
+  .then(blob => {
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    audio.play();
+    audio.onended = stopEqualizer;
+  })
+  .catch(err => {
+    console.error("Ошибка озвучки:", err);
+    stopEqualizer();
+  });
+}
+</script>
 </body>
 </html>
