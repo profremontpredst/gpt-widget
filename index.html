@@ -271,7 +271,7 @@
     window.addEventListener("load", () => {
       setTimeout(() => {
         if (messages.length === 0) {
-          switchMode('text'); // автоматически открывает переписку
+          parent.postMessage("open-widget", "*");
           const welcomeMessage = "Давайте подскажу вам";
           appendMessage(welcomeMessage, false);
           messages.push({ role: "assistant", content: welcomeMessage });
