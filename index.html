@@ -20,14 +20,14 @@
     right: 20px;
     width: 360px;
     height: 580px;
-    background: rgba(255, 255, 255, 0.92);
+    background: rgba(255, 255, 255, 0.85);
     border-radius: 16px;
     box-shadow: 0 0 20px rgba(0,0,0,0.3);
     display: flex;
     flex-direction: column;
     overflow: hidden;
     z-index: 9999;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
   }
 
   @media (max-width: 768px) {
@@ -90,16 +90,17 @@
     max-width: 85%;
     font-size: 14px;
     word-break: break-word;
+    backdrop-filter: blur(4px);
   }
 
   .from-user {
-    background: #c6f1ff;
+    background: rgba(0, 148, 255, 0.2);
     align-self: flex-end;
     color: #003366;
   }
 
   .from-bot {
-    background: #e9f4ff;
+    background: rgba(0, 0, 0, 0.05);
     align-self: flex-start;
     color: #222;
   }
@@ -108,9 +109,10 @@
     display: flex;
     gap: 6px;
     padding: 10px;
-    background: #f2f9ff;
+    background: rgba(255, 255, 255, 0.6);
     box-sizing: border-box;
     border-top: 1px solid #ddd;
+    backdrop-filter: blur(8px);
   }
 
   .chat-input {
@@ -151,16 +153,38 @@
     color: #0074bc;
   }
 
+  /* Voice mode */
+  #voice-status {
+    padding: 15px;
+    font-size: 14px;
+    color: #444;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(6px);
+  }
+
   .mic-button {
-    font-size: 15px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
     background-color: #0094ff;
-    color: #fff;
-    border-radius: 16px;
-    padding: 10px 16px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px auto;
+    transition: background 0.3s;
   }
 
   .mic-button:hover {
     background-color: #007cd6;
+  }
+
+  .mic-button svg {
+    width: 30px;
+    height: 30px;
+    fill: white;
   }
 </style>
 </head>
@@ -185,7 +209,11 @@
     <div class="chat-window" id="voice-chat">
       <div id="voice-status" style="padding: 15px; font-size: 14px;">Нажмите на микрофон, чтобы начать</div>
       <div style="text-align:center;">
-        <button class="mic-button">🎙 Начать говорить</button>
+        <button class="mic-button" title="Говорить">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+    <path d="M192 256c0 17.7-14.3 32-32 32s-32-14.3-32-32V128c0-17.7 14.3-32 32-32s32 14.3 32 32V256zM160 320c35.3 0 64-28.7 64-64V128a64 64 0 1 0-128 0V256c0 35.3 28.7 64 64 64zm56 32H104c-13.3 0-24 10.7-24 24s10.7 24 24 24h24v56c0 13.3 10.7 24 24 24s24-10.7 24-24V400h24c13.3 0 24-10.7 24-24s-10.7-24-24-24z"/>
+  </svg>
+</button>
       </div>
     </div>
   </div>
