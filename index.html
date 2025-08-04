@@ -186,6 +186,34 @@
     height: 30px;
     fill: white;
   }
+    .lead-form {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+}
+
+.lead-form input {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  width: 100%;
+}
+
+.lead-form button {
+  padding: 10px;
+  border-radius: 10px;
+  background-color: #0094ff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.lead-form button:hover {
+  background-color: #007cd6;
+}
 </style>
 </head>
 <body>
@@ -275,12 +303,43 @@
     }
 
     function appendMessage(text, isUser) {
-      const msg = document.createElement("div");
-      msg.className = "message " + (isUser ? "from-user" : "from-bot");
-      msg.innerHTML = isUser ? text : "<span class='bot-label'>Анна:</span> " + text;
-      chatBox.appendChild(msg);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
+  const msg = document.createElement("div");
+  msg.className = "message " + (isUser ? "from-user" : "from-bot");
+
+  if (!isUser && text.includes("[openLeadForm]")) {
+    const cleanText = text.replace("[openLeadForm]", "").trim();
+    msg.innerHTML = `<span class='bot-label'>Анна:</span> ${cleanText}
+      <form class="lead-form" onsubmit="submitLeadForm(event)">
+        <input type="tel" name="phone" placeholder="+7 (___) ___-__-__" required />
+        <button type="submit">Отправить</button>
+      </form>`;
+  } else {
+    msg.innerHTML = isUser
+      ? text
+      : "<span class='bot-label'>Анна:</span> " + text;
+  }
+
+  chatBox.appendChild(msg);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+    function submitLeadForm(event) {
+  event.preventDefault();
+  const form = event.target;
+  const phone = form.phone.value.trim();
+  if (!phone) return;
+
+  fetch("https://openai-gpt-proxy-sdox.onrender.com/lead", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ phone, userId })
+  })
+  .then(() => {
+    form.parentElement.innerHTML = "<span class='bot-label'>Анна:</span> Спасибо, мы с вами скоро свяжемся!";
+  })
+  .catch(() => {
+    form.parentElement.innerHTML = "<span class='bot-label'>Анна:</span> Ошибка отправки. Попробуйте позже.";
+  });
+}
 
     function startTextVoice() {
       const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
