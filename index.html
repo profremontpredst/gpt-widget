@@ -125,13 +125,18 @@
       cursor: pointer;
       font-size: 14px;
     }
+
+    .bot-label {
+      font-weight: bold;
+      color: #fff;
+    }
   </style>
 </head>
 <body>
   <div class="widget-container">
     <div class="tabs">
-      <div class="tab active" onclick="switchMode('text')">Текстовый бот</div>
-      <div class="tab" onclick="switchMode('voice')">Голосовой бот</div>
+      <div class="tab active" onclick="switchMode('text')">Переписка</div>
+      <div class="tab" onclick="switchMode('voice')">Разговор</div>
     </div>
     <div class="chat-window active" id="text-chat">
       <div class="chat-box"></div>
@@ -208,7 +213,7 @@
     function appendMessage(text, isUser) {
       const msg = document.createElement("div");
       msg.className = "message " + (isUser ? "from-user" : "from-bot");
-      msg.innerText = isUser ? text : "Анна: " + text;
+      msg.innerHTML = isUser ? text : "<span class='bot-label'>Анна:</span> " + text;
       chatBox.appendChild(msg);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
@@ -266,12 +271,12 @@
     window.addEventListener("load", () => {
       setTimeout(() => {
         if (messages.length === 0) {
+          switchMode('text'); // автоматически открывает переписку
           const welcomeMessage = "Давайте подскажу вам";
           appendMessage(welcomeMessage, false);
           messages.push({ role: "assistant", content: welcomeMessage });
-          parent.postMessage("show-notify", "*");
         }
-      }, 5000);
+      }, 10000);
     });
   </script>
 </body>
