@@ -398,6 +398,7 @@
           const welcomeMessage = "Давайте подскажу вам";
           appendMessage(welcomeMessage, false);
           messages.push({ role: "assistant", content: welcomeMessage });
+          parent.postMessage("show-notify", "*");
         }
       }, 10000);
     });
