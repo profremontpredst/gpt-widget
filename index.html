@@ -261,28 +261,34 @@
     }
 
     function sendMessage() {
-      const text = chatInput.value.trim();
-      if (!text) return;
-      appendMessage(text, true);
-      messages.push({ role: "user", content: text });
-      chatInput.value = "";
+  const text = chatInput.value.trim();
+  if (!text) return;
 
-      fetch(OPENAI_PROXY_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages, userId, mode: "pizza" })
-      })
-      .then(res => res.json())
-      .then(data => {
-        const reply = data?.choices?.[0]?.message?.content || "Ошибка";
-        appendMessage(reply, false);
-        messages.push({ role: "assistant", content: reply });
-      })
-      .catch(err => {
-        appendMessage("Ошибка запроса", false);
-        console.error(err);
-      });
-    }
+  appendMessage(text, true);
+  messages.push({ role: "user", content: text });
+  chatInput.value = "";
+
+  fetch(OPENAI_PROXY_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages, userId, mode: "pizza" })
+  })
+    .then(res => res.json())
+    .then(data => {
+      const gptMessage = data.choices?.[0]?.message?.content || "";
+      const triggerForm = data.choices?.[0]?.message?.triggerForm;
+
+      appendMessage(gptMessage, false);
+      messages.push({ role: "assistant", content: gptMessage });
+
+      // 💥 вызываем квиз, если GPT вставил [openLeadForm]
+      if (triggerForm) {
+        const quizLink = document.querySelector('[href="#квиз"]');
+        if (quizLink) quizLink.click();
+      }
+    })
+    .catch(error => console.error("❌ Ошибка при отправке запроса:", error));
+}
 
     function appendMessage(text, isUser) {
       const msg = document.createElement("div");
