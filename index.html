@@ -276,15 +276,15 @@
     .then(res => res.json())
     .then(data => {
       const gptMessage = data.choices?.[0]?.message?.content || "";
-      const triggerForm = data.choices?.[0]?.message?.triggerForm;
+      const triggerForm = data.triggerForm;
 
       appendMessage(gptMessage, false);
       messages.push({ role: "assistant", content: gptMessage });
 
-      // 💥 вызываем квиз, если GPT вставил [openLeadForm]
       if (triggerForm) {
         const quizLink = document.querySelector('[href="#квиз"]');
         if (quizLink) quizLink.click();
+        else console.warn("⚠️ Квиз не найден по селектору [href='#квиз']");
       }
     })
     .catch(error => console.error("❌ Ошибка при отправке запроса:", error));
