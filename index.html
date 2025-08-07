@@ -298,11 +298,12 @@
       msg.className = "message " + (isUser ? "from-user" : "from-bot");
 
       if (!isUser && text.includes("[openLeadForm]")) {
-        const cleanText = text.replace("[openLeadForm]", "").trim();
-        msg.innerHTML = `<span class='bot-label'>Анна:</span> ${cleanText}`;
-        const quizTrigger = document.querySelector('[href="#квиз"]');
-        if (quizTrigger) quizTrigger.click();
-      } else {
+  const cleanText = text.replace("[openLeadForm]", "").trim();
+  msg.innerHTML = `<span class='bot-label'>Анна:</span> ${cleanText}`;
+  parent.postMessage("open-form", "*");
+}
+}
+      else {
         msg.innerHTML = isUser
           ? text
           : "<span class='bot-label'>Анна:</span> " + text;
