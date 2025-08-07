@@ -285,24 +285,24 @@
 }
 
     function appendMessage(text, isUser) {
-      const msg = document.createElement("div");
-      msg.className = "message " + (isUser ? "from-user" : "from-bot");
+  const msg = document.createElement("div");
+  msg.className = "message " + (isUser ? "from-user" : "from-bot");
 
-      if (!isUser && text.includes("[openLeadForm]")) {
-  const cleanText = text.replace("[openLeadForm]", "").trim();
-  msg.innerHTML = `<span class='bot-label'>Анна:</span> ${cleanText}`;
-  parent.postMessage("open-form", "*");
-}
-}
-      else {
-        msg.innerHTML = isUser
-          ? text
-          : "<span class='bot-label'>Анна:</span> " + text;
-      }
+  // Проверка на триггер формы
+  let cleanText = text;
+  if (!isUser && text.includes("[openLeadForm]")) {
+    cleanText = text.replace("[openLeadForm]", "").trim();
+    parent.postMessage("open-form", "*");
+  }
 
-      chatBox.appendChild(msg);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
+  // Рендерим сообщение
+  msg.innerHTML = isUser
+    ? text
+    : `<span class='bot-label'>Анна:</span> ${cleanText}`;
+
+  document.getElementById("chat").appendChild(msg);
+  document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
+}
 
     function startTextVoice() {
       const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
