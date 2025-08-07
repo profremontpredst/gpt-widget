@@ -281,10 +281,14 @@
       messages.push({ role: "assistant", content: gptMessage });
 
       if (gptMessage.includes("[openLeadForm]")) {
-        const quizLink = document.querySelector('[href="#квиз"]');
-        if (quizLink) quizLink.click();
-        else console.warn("⚠️ Квиз не найден по селектору [href='#квиз']");
-      }
+  const trigger = document.querySelector('#triggerForm');
+  if (trigger) {
+    trigger.click();
+    console.log('✅ Клик по #triggerForm выполнен');
+  } else {
+    console.warn("❌ Триггер #triggerForm не найден");
+  }
+}
     })
     .catch(error => console.error("❌ Ошибка при отправке запроса:", error));
 }
