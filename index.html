@@ -280,15 +280,6 @@
       appendMessage(gptMessage, false);
       messages.push({ role: "assistant", content: gptMessage });
 
-      if (gptMessage.includes("[openLeadForm]")) {
-  const trigger = document.querySelector('#triggerForm');
-  if (trigger) {
-    trigger.click();
-    console.log('✅ Клик по #triggerForm выполнен');
-  } else {
-    console.warn("❌ Триггер #triggerForm не найден");
-  }
-}
     })
     .catch(error => console.error("❌ Ошибка при отправке запроса:", error));
 }
