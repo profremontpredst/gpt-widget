@@ -276,12 +276,11 @@
     .then(res => res.json())
     .then(data => {
       const gptMessage = data.choices?.[0]?.message?.content || "";
-      const triggerForm = data.triggerForm;
 
       appendMessage(gptMessage, false);
       messages.push({ role: "assistant", content: gptMessage });
 
-      if (triggerForm) {
+      if (gptMessage.includes("[openLeadForm]")) {
         const quizLink = document.querySelector('[href="#квиз"]');
         if (quizLink) quizLink.click();
         else console.warn("⚠️ Квиз не найден по селектору [href='#квиз']");
