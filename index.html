@@ -13,7 +13,6 @@
       background: transparent;
       color: #333;
     }
-
     .widget-container {
       position: fixed;
       bottom: 20px;
@@ -29,7 +28,6 @@
       z-index: 9999;
       backdrop-filter: blur(12px);
     }
-
     @media (max-width: 768px) {
       .widget-container {
         position: fixed !important;
@@ -40,14 +38,12 @@
         border-radius: 0 !important;
       }
     }
-
     .tabs {
       display: flex;
       justify-content: center;
       background: linear-gradient(to right, #72c9ff, #0094ff);
       border-bottom: 1px solid #ccc;
     }
-
     .tab {
       padding: 12px 16px;
       cursor: pointer;
@@ -55,150 +51,29 @@
       font-size: 14px;
       transition: background 0.2s;
     }
-
     .tab.active {
       background: rgba(255,255,255,0.15);
       border-bottom: 2px solid #fff;
       color: #fff;
     }
-
-    .chat-window {
-      flex: 1;
-      display: none;
-      flex-direction: column;
-      height: 100%;
-      overflow: hidden;
-    }
-
-    .chat-window.active {
-      display: flex;
-    }
-
-    .chat-box {
-      flex: 1;
-      overflow-y: auto;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-    }
-
-    .message {
-      margin-bottom: 8px;
-      padding: 10px 14px;
-      border-radius: 14px;
-      max-width: 85%;
-      font-size: 14px;
-      word-break: break-word;
-      backdrop-filter: blur(4px);
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      overflow: visible;
-    }
-
-    .from-user {
-      background: rgba(0, 148, 255, 0.2);
-      align-self: flex-end;
-      color: #003366;
-    }
-
-    .from-bot {
-      background: rgba(0, 0, 0, 0.05);
-      align-self: flex-start;
-      color: #222;
-    }
-
-    .chat-controls {
-      display: flex;
-      gap: 6px;
-      padding: 10px;
-      background: rgba(255, 255, 255, 0.6);
-      box-sizing: border-box;
-      border-top: 1px solid #ddd;
-      backdrop-filter: blur(8px);
-    }
-
-    .chat-input {
-      flex: 1;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 12px;
-      font-size: 14px;
-      outline: none;
-    }
-
-    button {
-      padding: 10px;
-      border: none;
-      border-radius: 12px;
-      background-color: #0094ff;
-      color: #fff;
-      cursor: pointer;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s;
-    }
-
-    button:hover {
-      background-color: #007cd6;
-    }
-
-    button svg {
-      width: 18px;
-      height: 18px;
-      fill: white;
-    }
-
-    .bot-label {
-      font-weight: bold;
-      color: #0074bc;
-    }
-
-    #voice-status {
-      padding: 15px;
-      font-size: 14px;
-      color: #444;
-      text-align: center;
-      background: rgba(255, 255, 255, 0.5);
-      backdrop-filter: blur(6px);
-    }
-
-    .mic-button {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background-color: #0094ff;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 20px auto;
-      transition: background 0.3s;
-    }
-
-    .mic-button:hover {
-      background-color: #007cd6;
-    }
-
-    .mic-button svg {
-      width: 30px;
-      height: 30px;
-      fill: white;
-    }
-
-    .chat-window,
-    .chat-box {
-      min-height: 0 !important;
-      overflow-y: auto !important;
-    }
-
-    .widget-container {
-      overflow: auto !important;
-    }
+    .chat-window { flex: 1; display: none; flex-direction: column; height: 100%; overflow: hidden; }
+    .chat-window.active { display: flex; }
+    .chat-box { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; justify-content: flex-end; }
+    .message { margin-bottom: 8px; padding: 10px 14px; border-radius: 14px; max-width: 85%; font-size: 14px; word-break: break-word; backdrop-filter: blur(4px); display: flex; flex-direction: column; gap: 6px; overflow: visible; }
+    .from-user { background: rgba(0, 148, 255, 0.2); align-self: flex-end; color: #003366; }
+    .from-bot { background: rgba(0, 0, 0, 0.05); align-self: flex-start; color: #222; }
+    .chat-controls { display: flex; gap: 6px; padding: 10px; background: rgba(255,255,255,0.6); box-sizing: border-box; border-top: 1px solid #ddd; backdrop-filter: blur(8px); }
+    .chat-input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 12px; font-size: 14px; outline: none; }
+    button { padding: 10px; border: none; border-radius: 12px; background-color: #0094ff; color: #fff; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+    button:hover { background-color: #007cd6; }
+    button svg { width: 18px; height: 18px; fill: white; }
+    .bot-label { font-weight: bold; color: #0074bc; }
+    #voice-status { padding: 15px; font-size: 14px; color: #444; text-align: center; background: rgba(255,255,255,0.5); backdrop-filter: blur(6px); }
+    .mic-button { width: 80px; height: 80px; border-radius: 50%; background-color: #0094ff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; margin: 20px auto; transition: background 0.3s; }
+    .mic-button:hover { background-color: #007cd6; }
+    .mic-button svg { width: 30px; height: 30px; fill: white; }
+    .chat-window, .chat-box { min-height: 0 !important; overflow-y: auto !important; }
+    .widget-container { overflow: auto !important; }
   </style>
 </head>
 <body>
@@ -207,6 +82,7 @@
       <div class="tab active" onclick="switchMode('text')">Переписка</div>
       <div class="tab" onclick="switchMode('voice')">Разговор</div>
     </div>
+
     <div class="chat-window active" id="text-chat">
       <div class="chat-box"><div id="chat"></div></div>
       <div class="chat-controls">
@@ -219,6 +95,7 @@
         </button>
       </div>
     </div>
+
     <div class="chat-window" id="voice-chat">
       <div id="voice-status">Нажмите на микрофон, чтобы начать</div>
       <div style="text-align:center;">
@@ -232,9 +109,11 @@
   <script>
     const OPENAI_PROXY_URL = "https://openai-gpt-proxy-sdox.onrender.com/gpt";
     const ELEVENLABS_STREAM_URL = "https://elevenlabs-proxy-c781.onrender.com/stream";
+
     let messages = [];
     const userId = localStorage.getItem("userId") || "user_" + Math.random().toString(36).substr(2, 9);
     localStorage.setItem("userId", userId);
+
     const chatBox = document.querySelector(".chat-box");
     const chatInput = document.getElementById("chatInput");
     const micButton = document.querySelector(".mic-button");
@@ -260,46 +139,84 @@
       }
     }
 
+    // === Связка с витриной пиццы ===
+    function sendPizzaCmd(scene){
+      parent.postMessage({type:"pizza:cmd", scene}, "*");
+      return new Promise(resolve=>{
+        const onMsg = (e)=>{
+          if (e.data && e.data.type==="pizza:uiReady"){
+            window.removeEventListener("message", onMsg);
+            resolve();
+          }
+        };
+        window.addEventListener("message", onMsg);
+      });
+    }
+    async function handlePizzaTags(fullText){
+      if (/\[showCatalog\]/i.test(fullText)) await sendPizzaCmd("showCatalog");
+      if (/\[showCombo\]/i.test(fullText))   await sendPizzaCmd("showCombo");
+      if (/\[confirmPay\]/i.test(fullText))  await sendPizzaCmd("confirm");
+      if (/\[showLoading\]/i.test(fullText)) await sendPizzaCmd("loading");
+      if (/\[showThanks\]/i.test(fullText))  await sendPizzaCmd("thanks");
+      if (/\[reset\]/i.test(fullText))       await sendPizzaCmd("reset");
+    }
+
     function sendMessage() {
-  const text = chatInput.value.trim();
-  if (!text) return;
+      const text = chatInput.value.trim();
+      if (!text) return;
 
-  appendMessage(text, true);
-  messages.push({ role: "user", content: text });
-  chatInput.value = "";
+      appendMessage(text, true);
+      messages.push({ role: "user", content: text });
+      chatInput.value = "";
 
-  fetch(OPENAI_PROXY_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages, userId, mode: "pizza" })
-  })
-    .then(res => res.json())
-    .then(data => {
-      const gptMessage = data.choices?.[0]?.message?.content || "";
+      fetch(OPENAI_PROXY_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages, userId, mode: "pizza" })
+      })
+        .then(res => res.json())
+        .then(async data => {
+          const gptMessage = data.choices?.[0]?.message?.content || "";
 
-      appendMessage(gptMessage, false);
-      messages.push({ role: "assistant", content: gptMessage });
+          // 1) Сцены сначала
+          await handlePizzaTags(gptMessage);
 
-    })
-    .catch(error => console.error("❌ Ошибка при отправке запроса:", error));
-}
+          // 2) Показ в чате (передаём оригинал, чтобы сработал [openLeadForm])
+          appendMessage(gptMessage, false);
+
+          // 3) В историю кладём очищенный текст без служебных тегов
+          const cleanForHistory = gptMessage
+            .replace(/\[openLeadForm\]/gi, "")
+            .replace(/\[(showCatalog|showCombo|confirmPay|showLoading|showThanks|reset)\]/gi, "")
+            .trim();
+
+          messages.push({ role: "assistant", content: cleanForHistory });
+        })
+        .catch(error => console.error("❌ Ошибка при отправке запроса:", error));
+    }
 
     function appendMessage(text, isUser) {
-  const msg = document.createElement("div");
-  msg.className = "message " + (isUser ? "from-user" : "from-bot");
+      const msg = document.createElement("div");
+      msg.className = "message " + (isUser ? "from-user" : "from-bot");
 
-  if (!isUser && text.includes("[openLeadForm]")) {
-    const cleanText = text.replace("[openLeadForm]", "").trim();
-    msg.innerHTML = `<span class='bot-label'>Анна:</span> ${cleanText}`;
-    parent.postMessage("open-form", "*");
-  } else {
-    msg.innerHTML = isUser
-      ? `<span class='user-label'>Вы:</span> ${text}`
-      : `<span class='bot-label'>Анна:</span> ${text}`;
-  }
+      let display = text;
 
-  document.getElementById("chat").appendChild(msg);
-}
+      // Триггер формы
+      if (!isUser && display.includes("[openLeadForm]")) {
+        display = display.replace("[openLeadForm]", "").trim();
+        parent.postMessage("open-form", "*");
+      }
+
+      // Прячем служебные теги сцен из текста
+      display = display.replace(/\[(showCatalog|showCombo|confirmPay|showLoading|showThanks|reset)\]/gi, "").trim();
+
+      msg.innerHTML = isUser
+        ? `<span class='user-label'>Вы:</span> ${display}`
+        : `<span class='bot-label'>Анна:</span> ${display}`;
+
+      document.getElementById("chat").appendChild(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
 
     function startTextVoice() {
       const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
@@ -329,7 +246,16 @@
         });
         const data = await res.json();
         const reply = data?.choices?.[0]?.message?.content || "Ошибка";
-        speakText(reply);
+
+        // сцены до озвучки
+        await handlePizzaTags(reply);
+
+        const voiceText = reply
+          .replace(/\[openLeadForm\]/gi, "")
+          .replace(/\[(showCatalog|showCombo|confirmPay|showLoading|showThanks|reset)\]/gi, "")
+          .trim();
+
+        speakText(voiceText);
       };
       recognition.onerror = () => {
         status.innerText = "Ошибка распознавания";
@@ -355,7 +281,7 @@
       setTimeout(() => {
         if (messages.length === 0) {
           parent.postMessage("open-widget", "*");
-          const welcomeMessage = "Давайте подскажу вам";
+          const welcomeMessage = "Давай подскажу";
           appendMessage(welcomeMessage, false);
           messages.push({ role: "assistant", content: welcomeMessage });
           parent.postMessage("show-notify", "*");
@@ -363,7 +289,8 @@
       }, 10000);
     });
   </script>
+
   <!-- Триггер для открытия формы -->
-<a id="triggerForm" href="#popup:subscription" style="display: none;">Открыть форму</a>
+  <a id="triggerForm" href="#popup:subscription" style="display: none;">Открыть форму</a>
 </body>
 </html>
