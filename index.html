@@ -262,81 +262,47 @@
       };
     });
 
-   // Стримовый TTS: один активный поток, старт после 1-го чанка
+   // ► ЖЁСТКИЙ РЕЖИМ БЕЗ MSE — всегда играет до конца (без обрывов)
 async function speakText(text) {
   try {
-    // гасим предыдущий поток/аудио
+    // гасим предыдущий сеанс
     if (window.__ttsAbort) { try { window.__ttsAbort.abort(); } catch {} }
     if (window.__ttsAudio) { try { window.__ttsAudio.pause(); } catch {} }
-    if (window.__ttsURL)   { URL.revokeObjectURL(window.__ttsURL); window.__ttsURL = null; }
-
-    // Fallback без MediaSource
-    if (typeof MediaSource === "undefined") {
-      const r = await fetch(ELEVENLABS_STREAM_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text })
-      });
-      const b = await r.blob();
-      const u = URL.createObjectURL(b);
-      const a = new Audio(u);
-      a.playsInline = true;
-      window.__ttsAudio = a;
-      window.__ttsURL = u;
-      await a.play().catch(()=>{});
-      return;
-    }
-
-    const ms = new MediaSource();
-    const obj = URL.createObjectURL(ms);
-    const a = new Audio(obj);
-    a.playsInline = true;
-    a.autoplay = false;          // запускаем ПОСЛЕ первого чанка
-    window.__ttsAudio = a;
-    window.__ttsURL = obj;
+    if (window.__ttsURL)   { try { URL.revokeObjectURL(window.__ttsURL); } catch {} }
+    window.__ttsAbort = null; window.__ttsAudio = null; window.__ttsURL = null;
 
     const ctrl = new AbortController();
     window.__ttsAbort = ctrl;
 
-    ms.addEventListener("sourceopen", async () => {
-      const sb = ms.addSourceBuffer("audio/mpeg");
-      let started = false;
-
-      const res = await fetch(ELEVENLABS_STREAM_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
-        signal: ctrl.signal
-      });
-      if (!res.ok || !res.body) { try { ms.endOfStream(); } catch {}; return; }
-
-      const reader = res.body.getReader();
-
-      const feed = (chunk) => new Promise((resolve, reject) => {
-        const onEnd = () => { sb.removeEventListener("updateend", onEnd); resolve(); };
-        const onErr = (e) => { sb.removeEventListener("error", onErr); reject(e); };
-        sb.addEventListener("updateend", onEnd, { once: true });
-        sb.addEventListener("error", onErr, { once: true });
-        sb.appendBuffer(chunk);
-      });
-
-      try {
-        for (;;) {
-          const { value, done } = await reader.read();
-          if (done) break;
-          await feed(value);
-
-          if (!started) {
-            started = true;
-            try { await a.play(); } catch {}
-          }
-        }
-      } catch (_) {
-        // прервано/обрыв — норм
-      } finally {
-        try { ms.endOfStream(); } catch {}
-      }
+    // тянем поток и собираем в цельный mp3
+    const r = await fetch(ELEVENLABS_STREAM_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+      signal: ctrl.signal
     });
+    if (!r.ok || !r.body) {
+      console.error("TTS bad status:", r.status);
+      return;
+    }
+
+    const reader = r.body.getReader();
+    const chunks = [];
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      if (value && value.byteLength) chunks.push(value);
+    }
+
+    const blob = new Blob(chunks, { type: "audio/mpeg" });
+    const url  = URL.createObjectURL(blob);
+    const a    = new Audio(url);
+    a.playsInline = true;
+    window.__ttsAudio = a;
+    window.__ttsURL  = url;
+
+    a.onended = () => { try { URL.revokeObjectURL(url); } catch {} };
+    await a.play().catch(()=>{});
   } catch (e) {
     console.error("speakText error:", e?.message || e);
   }
