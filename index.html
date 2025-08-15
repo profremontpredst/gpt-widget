@@ -108,7 +108,6 @@
 
   <script>
     const OPENAI_PROXY_URL = "https://openai-gpt-proxy-mcnj.onrender.com/gpt";
-    const ELEVENLABS_STREAM_URL = "https://elevenlabs-proxy-1o1s.onrender.com/stream"; // можно оставить, но далее не используем
     const ELEVENLABS_SAY_URL   = "https://elevenlabs-proxy-1o1s.onrender.com/say";
 
     let messages = [];
@@ -263,22 +262,35 @@
       };
     });
 
- // максимально простой и стабильный режим: <audio src="/say?text=...">
-function speakText(text) {
+ // ПРОСТО: отправляем POST /say с JSON, качаем mp3 и играем целиком
+async function speakText(text) {
   try {
-    // стоп предыдущего воспроизведения
-    if (window.__ttsAudio) {
-      try { window.__ttsAudio.pause(); } catch {}
-      try { if (window.__ttsURL) URL.revokeObjectURL(window.__ttsURL); } catch {}
+    if (window.__ttsAudio) { try { window.__ttsAudio.pause(); } catch {} }
+
+    const res = await fetch(ELEVENLABS_SAY_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text })
+    });
+    if (!res.ok) {
+      console.error("TTS status:", res.status);
+      return;
     }
-    const url = ELEVENLABS_SAY_URL + "?text=" + encodeURIComponent(text);
-    const a = new Audio(url);
-    a.preload = "auto";
-    a.playsInline = true;
-    a.crossOrigin = "anonymous";
-    window.__ttsAudio = a;
-    window.__ttsURL = null; // здесь URL не объектный, ревокать нечего
-    a.play().catch(()=>{});
+
+    const buf = await res.arrayBuffer();
+    if (!buf || buf.byteLength === 0) {
+      console.error("TTS empty audio");
+      return;
+    }
+
+    const url = URL.createObjectURL(new Blob([buf], { type: "audio/mpeg" }));
+    const audio = new Audio(url);
+    audio.preload = "auto";
+    audio.playsInline = true;
+    window.__ttsAudio = audio;
+
+    audio.onended = () => { try { URL.revokeObjectURL(url); } catch {} };
+    await audio.play().catch(()=>{});
   } catch (e) {
     console.error("speakText error:", e?.message || e);
   }
