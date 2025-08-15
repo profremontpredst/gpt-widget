@@ -108,7 +108,8 @@
 
   <script>
     const OPENAI_PROXY_URL = "https://openai-gpt-proxy-mcnj.onrender.com/gpt";
-    const ELEVENLABS_STREAM_URL = "https://elevenlabs-proxy-1o1s.onrender.com/stream";
+    const ELEVENLABS_STREAM_URL = "https://elevenlabs-proxy-1o1s.onrender.com/stream"; // можно оставить, но далее не используем
+    const ELEVENLABS_SAY_URL   = "https://elevenlabs-proxy-1o1s.onrender.com/say";
 
     let messages = [];
     const userId = localStorage.getItem("userId") || "user_" + Math.random().toString(36).substr(2, 9);
@@ -262,47 +263,22 @@
       };
     });
 
-   // ► ЖЁСТКИЙ РЕЖИМ БЕЗ MSE — всегда играет до конца (без обрывов)
-async function speakText(text) {
+ // максимально простой и стабильный режим: <audio src="/say?text=...">
+function speakText(text) {
   try {
-    // гасим предыдущий сеанс
-    if (window.__ttsAbort) { try { window.__ttsAbort.abort(); } catch {} }
-    if (window.__ttsAudio) { try { window.__ttsAudio.pause(); } catch {} }
-    if (window.__ttsURL)   { try { URL.revokeObjectURL(window.__ttsURL); } catch {} }
-    window.__ttsAbort = null; window.__ttsAudio = null; window.__ttsURL = null;
-
-    const ctrl = new AbortController();
-    window.__ttsAbort = ctrl;
-
-    // тянем поток и собираем в цельный mp3
-    const r = await fetch(ELEVENLABS_STREAM_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
-      signal: ctrl.signal
-    });
-    if (!r.ok || !r.body) {
-      console.error("TTS bad status:", r.status);
-      return;
+    // стоп предыдущего воспроизведения
+    if (window.__ttsAudio) {
+      try { window.__ttsAudio.pause(); } catch {}
+      try { if (window.__ttsURL) URL.revokeObjectURL(window.__ttsURL); } catch {}
     }
-
-    const reader = r.body.getReader();
-    const chunks = [];
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      if (value && value.byteLength) chunks.push(value);
-    }
-
-    const blob = new Blob(chunks, { type: "audio/mpeg" });
-    const url  = URL.createObjectURL(blob);
-    const a    = new Audio(url);
+    const url = ELEVENLABS_SAY_URL + "?text=" + encodeURIComponent(text);
+    const a = new Audio(url);
+    a.preload = "auto";
     a.playsInline = true;
+    a.crossOrigin = "anonymous";
     window.__ttsAudio = a;
-    window.__ttsURL  = url;
-
-    a.onended = () => { try { URL.revokeObjectURL(url); } catch {} };
-    await a.play().catch(()=>{});
+    window.__ttsURL = null; // здесь URL не объектный, ревокать нечего
+    a.play().catch(()=>{});
   } catch (e) {
     console.error("speakText error:", e?.message || e);
   }
