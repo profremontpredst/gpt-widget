@@ -247,20 +247,15 @@
         const data = await res.json();
         const reply = data?.choices?.[0]?.message?.content || "Ошибка";
 
-// сцены до озвучки
-await handlePizzaTags(reply);
+        // сцены до озвучки
+        await handlePizzaTags(reply);
 
-// показать в чате
-appendMessage(reply, false);
-messages.push({ role: "assistant", content: reply.replace(/\[.*?\]/g, "").trim() });
+        const voiceText = reply
+          .replace(/\[openLeadForm\]/gi, "")
+          .replace(/\[(showCatalog|showCombo|confirmPay|showLoading|showThanks|reset)\]/gi, "")
+          .trim();
 
-// озвучка
-const voiceText = reply
-  .replace(/\[openLeadForm\]/gi, "")
-  .replace(/\[(showCatalog|showCombo|confirmPay|showLoading|showThanks|reset)\]/gi, "")
-  .trim();
-
-speakText(voiceText);
+        speakText(voiceText);
       };
       recognition.onerror = () => {
         status.innerText = "Ошибка распознавания";
