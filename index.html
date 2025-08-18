@@ -278,14 +278,7 @@ micButton.addEventListener("click", () => {
     };
 
     recognition.onend = () => {
-  if (isListening) {
-    setTimeout(() => {
-      // рестарт только если бот закончил говорить
-      if (isListening && (!window.__ttsAudio || window.__ttsAudio.paused)) {
-        recognition.start();
-      }
-    }, 400);
-  }
+  // ничего не делаем, перезапуск теперь в speakText.onended
 };
 
     recognition.start();
@@ -297,10 +290,14 @@ micButton.addEventListener("click", () => {
   }
 });
 
-   // ► Чистая озвучка без наложений
+   // ► Озвучка с паузой микрофона
 async function speakText(text) {
   try {
-    // стоп предыдущего звука
+    // стопаем распознавалку пока говорим
+    if (recognition && isListening) {
+      recognition.stop();
+    }
+
     if (window.__ttsAudio) {
       try { window.__ttsAudio.pause(); } catch {}
     }
@@ -334,7 +331,15 @@ async function speakText(text) {
     window.__ttsAudio = a;
     window.__ttsURL  = url;
 
-    a.onended = () => { try { URL.revokeObjectURL(url); } catch {} };
+    a.onended = () => {
+      try { URL.revokeObjectURL(url); } catch {}
+
+      // бот закончил говорить → перезапускаем микрофон
+      if (isListening && recognition) {
+        recognition.start();
+      }
+    };
+
     await a.play().catch(()=>{});
   } catch (e) {
     console.error("speakText error:", e?.message || e);
