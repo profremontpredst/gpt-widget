@@ -248,10 +248,11 @@ micButton.addEventListener("click", () => {
       isListening = true;
     };
 
-    recognition.onresult = async (event) => {
+        recognition.onresult = async (event) => {
       const text = event.results[event.results.length - 1][0].transcript;
       status.innerText = "🗣 " + text;
 
+      // добавляем только один раз user-сообщение
       messages.push({ role: "user", content: text });
 
       const res = await fetch(OPENAI_PROXY_URL, {
@@ -270,18 +271,19 @@ micButton.addEventListener("click", () => {
         .replace(/\[(showCatalog|showCombo|confirmPay|showLoading|showThanks|reset)\]/gi, "")
         .trim();
 
+      // кладём в историю (но не дублируем на экран)
       messages.push({ role: "assistant", content: voiceText });
 
       speakText(voiceText);
     };
 
-    recognition.onerror = (e) => {
-      console.error("STT error:", e.error);
-      status.innerText = "Ошибка распознавания";
-    };
-
     recognition.onend = () => {
-      if (isListening) recognition.start(); // авто-рестарт
+      // авто-рестарт только если реально ждём голос
+      if (isListening) {
+        setTimeout(() => {
+          if (isListening) recognition.start();
+        }, 300); // небольшая задержка, чтобы не наложилось с озвучкой
+      }
     };
 
     recognition.start();
