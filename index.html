@@ -172,7 +172,7 @@
       fetch(OPENAI_PROXY_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages, userId, mode: "pizza" })
+        body: JSON.stringify({ messages, userId, mode: "pizza_text" })
       })
         .then(res => res.json())
         .then(async data => {
@@ -258,7 +258,7 @@ micButton.addEventListener("click", () => {
       const res = await fetch(OPENAI_PROXY_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages, userId, mode: "voice" })
+        body: JSON.stringify({ messages, userId, mode: "pizza_voice" })
       });
       const data = await res.json();
       const reply = data?.choices?.[0]?.message?.content || "Ошибка";
