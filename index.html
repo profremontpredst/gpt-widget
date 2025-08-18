@@ -278,13 +278,15 @@ micButton.addEventListener("click", () => {
     };
 
     recognition.onend = () => {
-      // авто-рестарт только если реально ждём голос
-      if (isListening) {
-        setTimeout(() => {
-          if (isListening) recognition.start();
-        }, 300); // небольшая задержка, чтобы не наложилось с озвучкой
+  if (isListening) {
+    setTimeout(() => {
+      // рестарт только если бот закончил говорить
+      if (isListening && (!window.__ttsAudio || window.__ttsAudio.paused)) {
+        recognition.start();
       }
-    };
+    }, 400);
+  }
+};
 
     recognition.start();
   } else {
