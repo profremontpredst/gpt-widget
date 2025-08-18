@@ -230,56 +230,84 @@
       recognition.onerror = () => alert("Ошибка распознавания");
     }
 
-    micButton.addEventListener("click", () => {
-      const status = document.getElementById("voice-status");
-      status.innerText = "Говорите...";
-      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.lang = "ru-RU";
-      recognition.start();
-      recognition.onresult = async (event) => {
-        const text = event.results[0][0].transcript;
-        status.innerText = "🗣 " + text;
-        const res = await fetch(OPENAI_PROXY_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: [{ role: "user", content: text }], userId, mode: "voice" })
-        });
-        const data = await res.json();
-        const reply = data?.choices?.[0]?.message?.content || "Ошибка";
+    let isListening = false;
+let recognition;
 
-        // сцены до озвучки
-        await handlePizzaTags(reply);
+micButton.addEventListener("click", () => {
+  const status = document.getElementById("voice-status");
 
-        const voiceText = reply
-          .replace(/\[openLeadForm\]/gi, "")
-          .replace(/\[(showCatalog|showCombo|confirmPay|showLoading|showThanks|reset)\]/gi, "")
-          .trim();
+  if (!isListening) {
+    // запуск постоянного прослушивания
+    recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = "ru-RU";
+    recognition.continuous = true;
+    recognition.interimResults = false;
 
-        speakText(voiceText);
-      };
-      recognition.onerror = () => {
-        status.innerText = "Ошибка распознавания";
-      };
-    });
+    recognition.onstart = () => {
+      status.innerText = "🎤 Слушаю...";
+      isListening = true;
+    };
 
-   // ► ЖЁСТКИЙ РЕЖИМ БЕЗ MSE — всегда играет до конца (без обрывов)
+    recognition.onresult = async (event) => {
+      const text = event.results[event.results.length - 1][0].transcript;
+      status.innerText = "🗣 " + text;
+
+      messages.push({ role: "user", content: text });
+
+      const res = await fetch(OPENAI_PROXY_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages, userId, mode: "voice" })
+      });
+      const data = await res.json();
+      const reply = data?.choices?.[0]?.message?.content || "Ошибка";
+
+      // сцены до озвучки
+      await handlePizzaTags(reply);
+
+      const voiceText = reply
+        .replace(/\[openLeadForm\]/gi, "")
+        .replace(/\[(showCatalog|showCombo|confirmPay|showLoading|showThanks|reset)\]/gi, "")
+        .trim();
+
+      messages.push({ role: "assistant", content: voiceText });
+
+      speakText(voiceText);
+    };
+
+    recognition.onerror = (e) => {
+      console.error("STT error:", e.error);
+      status.innerText = "Ошибка распознавания";
+    };
+
+    recognition.onend = () => {
+      if (isListening) recognition.start(); // авто-рестарт
+    };
+
+    recognition.start();
+  } else {
+    // стоп
+    recognition.stop();
+    status.innerText = "Нажмите на микрофон, чтобы начать";
+    isListening = false;
+  }
+});
+
+   // ► Чистая озвучка без наложений
 async function speakText(text) {
   try {
-    // гасим предыдущий сеанс
-    if (window.__ttsAbort) { try { window.__ttsAbort.abort(); } catch {} }
-    if (window.__ttsAudio) { try { window.__ttsAudio.pause(); } catch {} }
-    if (window.__ttsURL)   { try { URL.revokeObjectURL(window.__ttsURL); } catch {} }
-    window.__ttsAbort = null; window.__ttsAudio = null; window.__ttsURL = null;
+    // стоп предыдущего звука
+    if (window.__ttsAudio) {
+      try { window.__ttsAudio.pause(); } catch {}
+    }
+    if (window.__ttsURL) {
+      try { URL.revokeObjectURL(window.__ttsURL); } catch {}
+    }
 
-    const ctrl = new AbortController();
-    window.__ttsAbort = ctrl;
-
-    // тянем поток и собираем в цельный mp3
     const r = await fetch(ELEVENLABS_STREAM_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
-      signal: ctrl.signal
+      body: JSON.stringify({ text })
     });
     if (!r.ok || !r.body) {
       console.error("TTS bad status:", r.status);
@@ -298,6 +326,7 @@ async function speakText(text) {
     const url  = URL.createObjectURL(blob);
     const a    = new Audio(url);
     a.playsInline = true;
+
     window.__ttsAudio = a;
     window.__ttsURL  = url;
 
