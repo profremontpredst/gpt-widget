@@ -290,10 +290,9 @@ micButton.addEventListener("click", () => {
   }
 });
 
-   // ► Озвучка с паузой микрофона
+   // ► Озвучка GPT-5 Speech-to-Speech
 async function speakText(text) {
   try {
-    // стопаем распознавалку пока говорим
     if (recognition && isListening) {
       recognition.stop();
     }
@@ -305,25 +304,20 @@ async function speakText(text) {
       try { URL.revokeObjectURL(window.__ttsURL); } catch {}
     }
 
-    const r = await fetch(ELEVENLABS_STREAM_URL, {
+    // получаем mp3 напрямую от сервера GPT
+    const r = await fetch("https://openai-gpt-proxy-mcnj.onrender.com/voice-gpt5", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text })
+      headers: { "Content-Type": "application/octet-stream" },
+      body: new TextEncoder().encode(text) // тут пока текст, позже можно передавать аудио
     });
-    if (!r.ok || !r.body) {
-      console.error("TTS bad status:", r.status);
+
+    if (!r.ok) {
+      console.error("GPT voice bad status:", r.status);
       return;
     }
 
-    const reader = r.body.getReader();
-    const chunks = [];
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      if (value && value.byteLength) chunks.push(value);
-    }
-
-    const blob = new Blob(chunks, { type: "audio/mpeg" });
+    const buffer = await r.arrayBuffer();
+    const blob = new Blob([buffer], { type: "audio/mpeg" });
     const url  = URL.createObjectURL(blob);
     const a    = new Audio(url);
     a.playsInline = true;
@@ -333,8 +327,6 @@ async function speakText(text) {
 
     a.onended = () => {
       try { URL.revokeObjectURL(url); } catch {}
-
-      // бот закончил говорить → перезапускаем микрофон
       if (isListening && recognition) {
         recognition.start();
       }
