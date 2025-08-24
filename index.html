@@ -169,11 +169,16 @@
       messages.push({ role: "user", content: text });
       chatInput.value = "";
 
-      fetch(OPENAI_PROXY_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages, userId, mode: "pizza_text" })
-      })
+      // определяем mode из data-атрибута
+const widgetEl = document.currentScript.closest("iframe") || document.body;
+const widgetMode = widgetEl.dataset.mode || "text";
+
+// === ТЕКСТОВЫЙ ЗАПРОС ===
+fetch(OPENAI_PROXY_URL, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ messages, userId, mode: widgetMode })
+})
         .then(res => res.json())
         .then(async data => {
           const gptMessage = data.choices?.[0]?.message?.content || "";
@@ -256,10 +261,10 @@ micButton.addEventListener("click", () => {
       messages.push({ role: "user", content: text });
 
       const res = await fetch(OPENAI_PROXY_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages, userId, mode: "pizza_voice" })
-      });
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ messages, userId, mode: widgetMode })
+});
       const data = await res.json();
       const reply = data?.choices?.[0]?.message?.content || "Ошибка";
 
