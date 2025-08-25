@@ -263,7 +263,7 @@ micButton.addEventListener("click", () => {
       const res = await fetch(OPENAI_PROXY_URL, {
   method: "POST",
   headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ messages, userId, mode: widgetMode })
+  body: JSON.stringify({ messages, userId, mode: widgetMode === "text" ? "voice" : widgetMode })
 });
       const data = await res.json();
       const reply = data?.choices?.[0]?.message?.content || "Ошибка";
