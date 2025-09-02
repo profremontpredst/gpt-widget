@@ -206,10 +206,10 @@ fetch(OPENAI_PROXY_URL, {
       let display = text;
 
       // Триггер формы
-      if (!isUser && display.includes("[openLeadForm]")) {
-        display = display.replace("[openLeadForm]", "").trim();
-        parent.postMessage("open-form", "*");
-      }
+if (!isUser && /\[openLeadForm\]/i.test(display)) {
+  parent.postMessage("open-form", "*");
+  display = display.replace(/\[openLeadForm\]/gi, "").trim();
+}
 
       // Прячем служебные теги сцен из текста
       display = display.replace(/\[(showCatalog|showCombo|confirmPay|showLoading|showThanks|reset)\]/gi, "").trim();
