@@ -106,105 +106,78 @@
     </div>
   </div>
 
-  <script>
-    const OPENAI_PROXY_URL = "https://openai-gpt-proxy-mcnj.onrender.com/gpt";
-    const ELEVENLABS_STREAM_URL = "https://elevenlabs-proxy-1o1s.onrender.com/stream";
+ <script>
+const OPENAI_PROXY_URL = "https://openai-gpt-proxy-mcnj.onrender.com/gpt";
+const ELEVENLABS_STREAM_URL = "https://elevenlabs-proxy-1o1s.onrender.com/stream";
 
-    let messages = [];
-    const userId = localStorage.getItem("userId") || "user_" + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem("userId", userId);
+let messages = [];
+const userId = localStorage.getItem("userId") || "user_" + Math.random().toString(36).substr(2, 9);
+localStorage.setItem("userId", userId);
 
-    const chatBox = document.querySelector(".chat-box");
-    const chatInput = document.getElementById("chatInput");
-    const micButton = document.querySelector(".mic-button");
-    // читаем mode один раз глобально
+const chatBox = document.querySelector(".chat-box");
+const chatInput = document.getElementById("chatInput");
+const micButton = document.querySelector(".mic-button");
+
 const urlParams = new URLSearchParams(window.location.search);
 let widgetMode = urlParams.get("mode") || "text";
 
-    document.addEventListener("DOMContentLoaded", () => {
-      chatInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" && !e.shiftKey) {
-          e.preventDefault();
-          sendMessage();
-        }
-      });
-    });
-
-    function switchMode(mode) {
-      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-      document.querySelectorAll('.chat-window').forEach(win => win.classList.remove('active'));
-      if (mode === 'text') {
-        document.querySelector('.tab:nth-child(1)').classList.add('active');
-        document.getElementById('text-chat').classList.add('active');
-      } else {
-        document.querySelector('.tab:nth-child(2)').classList.add('active');
-        document.getElementById('voice-chat').classList.add('active');
-      }
+document.addEventListener("DOMContentLoaded", () => {
+  chatInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
     }
+  });
+});
 
-    // === Связка с витриной пиццы ===
-    function sendPizzaCmd(scene){
-      parent.postMessage({type:"pizza:cmd", scene}, "*");
-      return new Promise(resolve=>{
-        const onMsg = (e)=>{
-          if (e.data && e.data.type==="pizza:uiReady"){
-            window.removeEventListener("message", onMsg);
-            resolve();
-          }
-        };
-        window.addEventListener("message", onMsg);
-      });
-    }
-    async function handlePizzaTags(fullText){
-      if (/\[showCatalog\]/i.test(fullText)) await sendPizzaCmd("showCatalog");
-      if (/\[showCombo\]/i.test(fullText))   await sendPizzaCmd("showCombo");
-      if (/\[confirmPay\]/i.test(fullText))  await sendPizzaCmd("confirm");
-      if (/\[showLoading\]/i.test(fullText)) await sendPizzaCmd("loading");
-      if (/\[showThanks\]/i.test(fullText))  await sendPizzaCmd("thanks");
-      if (/\[reset\]/i.test(fullText))       await sendPizzaCmd("reset");
-    }
+function switchMode(mode) {
+  document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+  document.querySelectorAll('.chat-window').forEach(win => win.classList.remove('active'));
+  if (mode === 'text') {
+    document.querySelector('.tab:nth-child(1)').classList.add('active');
+    document.getElementById('text-chat').classList.add('active');
+  } else {
+    document.querySelector('.tab:nth-child(2)').classList.add('active');
+    document.getElementById('voice-chat').classList.add('active');
+  }
+}
 
-    function sendMessage() {
-      const text = chatInput.value.trim();
-      if (!text) return;
+// 🔥 только форма
+async function handleFormTags(fullText) {
+  if (/\[openLeadForm\]/i.test(fullText)) {
+    parent.postMessage({ type: "open-form" }, "*");
+  }
+}
 
-      appendMessage(text, true);
-      messages.push({ role: "user", content: text });
-      chatInput.value = "";
+function sendMessage() {
+  const text = chatInput.value.trim();
+  if (!text) return;
 
-// === ТЕКСТОВЫЙ ЗАПРОС ===
-fetch(OPENAI_PROXY_URL, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ messages, userId, mode: widgetMode })
-})
-        .then(res => res.json())
-        .then(async data => {
-          const gptMessage = data.choices?.[0]?.message?.content || "";
+  appendMessage(text, true);
+  messages.push({ role: "user", content: text });
+  chatInput.value = "";
 
-          // 1) Сцены сначала
-          await handlePizzaTags(gptMessage);
+  fetch(OPENAI_PROXY_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages, userId, mode: widgetMode })
+  })
+    .then(res => res.json())
+    .then(async data => {
+      const gptMessage = data.choices?.[0]?.message?.content || "";
+      await handleFormTags(gptMessage);
+      appendMessage(gptMessage, false);
+      const cleanForHistory = gptMessage.replace(/\[openLeadForm\]/gi, "").trim();
+      messages.push({ role: "assistant", content: cleanForHistory });
+    })
+    .catch(error => console.error("❌ Ошибка при отправке запроса:", error));
+}
 
-          // 2) Показ в чате (передаём оригинал, чтобы сработал [openLeadForm])
-          appendMessage(gptMessage, false);
-
-          // 3) В историю кладём очищенный текст без служебных тегов
-          const cleanForHistory = gptMessage
-            .replace(/\[openLeadForm\]/gi, "")
-            .replace(/\[(showCatalog|showCombo|confirmPay|showLoading|showThanks|reset)\]/gi, "")
-            .trim();
-
-          messages.push({ role: "assistant", content: cleanForHistory });
-        })
-        .catch(error => console.error("❌ Ошибка при отправке запроса:", error));
-    }
-
-    function appendMessage(text, isUser) {
+function appendMessage(text, isUser) {
   const msg = document.createElement("div");
   msg.className = "message " + (isUser ? "from-user" : "from-bot");
   let display = text;
 
-  // 🔥 Триггер формы
   if (!isUser && /\[openLeadForm\]/i.test(display)) {
     parent.postMessage({ type: "open-form" }, "*");
     display = display.replace(/\[openLeadForm\]/gi, "").trim();
@@ -218,26 +191,25 @@ fetch(OPENAI_PROXY_URL, {
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-    function startTextVoice() {
-      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.lang = "ru-RU";
-      recognition.start();
-      recognition.onresult = (event) => {
-        const text = event.results[0][0].transcript;
-        chatInput.value = text;
-        sendMessage();
-      };
-      recognition.onerror = () => alert("Ошибка распознавания");
-    }
+function startTextVoice() {
+  const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  recognition.lang = "ru-RU";
+  recognition.start();
+  recognition.onresult = (event) => {
+    const text = event.results[0][0].transcript;
+    chatInput.value = text;
+    sendMessage();
+  };
+  recognition.onerror = () => alert("Ошибка распознавания");
+}
 
-    let isListening = false;
+let isListening = false;
 let recognition;
 
 micButton.addEventListener("click", () => {
   const status = document.getElementById("voice-status");
 
   if (!isListening) {
-    // запуск постоянного прослушивания
     recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
     recognition.lang = "ru-RU";
     recognition.continuous = true;
@@ -248,72 +220,46 @@ micButton.addEventListener("click", () => {
       isListening = true;
     };
 
-        recognition.onresult = async (event) => {
+    recognition.onresult = async (event) => {
       const text = event.results[event.results.length - 1][0].transcript;
       status.innerText = "🗣 " + text;
-
-      // добавляем только один раз user-сообщение
       messages.push({ role: "user", content: text });
 
       const res = await fetch(OPENAI_PROXY_URL, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ messages, userId, mode: widgetMode === "text" ? "voice" : widgetMode })
-});
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages, userId, mode: widgetMode === "text" ? "voice" : widgetMode })
+      });
       const data = await res.json();
       const reply = data?.choices?.[0]?.message?.content || "Ошибка";
 
-      // сцены до озвучки
-      await handlePizzaTags(reply);
-
-      const voiceText = reply
-        .replace(/\[openLeadForm\]/gi, "")
-        .replace(/\[(showCatalog|showCombo|confirmPay|showLoading|showThanks|reset)\]/gi, "")
-        .trim();
-
-      // кладём в историю (но не дублируем на экран)
+      await handleFormTags(reply);
+      const voiceText = reply.replace(/\[openLeadForm\]/gi, "").trim();
       messages.push({ role: "assistant", content: voiceText });
-
       speakText(voiceText);
     };
 
-    recognition.onend = () => {
-  // ничего не делаем, перезапуск теперь в speakText.onended
-};
-
+    recognition.onend = () => {};
     recognition.start();
   } else {
-    // стоп
     recognition.stop();
     status.innerText = "Нажмите на микрофон, чтобы начать";
     isListening = false;
   }
 });
 
-   // ► Озвучка с паузой микрофона
 async function speakText(text) {
   try {
-    // стопаем распознавалку пока говорим
-    if (recognition && isListening) {
-      recognition.stop();
-    }
-
-    if (window.__ttsAudio) {
-      try { window.__ttsAudio.pause(); } catch {}
-    }
-    if (window.__ttsURL) {
-      try { URL.revokeObjectURL(window.__ttsURL); } catch {}
-    }
+    if (recognition && isListening) recognition.stop();
+    if (window.__ttsAudio) try { window.__ttsAudio.pause(); } catch {}
+    if (window.__ttsURL) try { URL.revokeObjectURL(window.__ttsURL); } catch {}
 
     const r = await fetch(ELEVENLABS_STREAM_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text })
     });
-    if (!r.ok || !r.body) {
-      console.error("TTS bad status:", r.status);
-      return;
-    }
+    if (!r.ok || !r.body) return;
 
     const reader = r.body.getReader();
     const chunks = [];
@@ -324,20 +270,16 @@ async function speakText(text) {
     }
 
     const blob = new Blob(chunks, { type: "audio/mpeg" });
-    const url  = URL.createObjectURL(blob);
-    const a    = new Audio(url);
+    const url = URL.createObjectURL(blob);
+    const a = new Audio(url);
     a.playsInline = true;
 
     window.__ttsAudio = a;
-    window.__ttsURL  = url;
+    window.__ttsURL = url;
 
     a.onended = () => {
       try { URL.revokeObjectURL(url); } catch {}
-
-      // бот закончил говорить → перезапускаем микрофон
-      if (isListening && recognition) {
-        recognition.start();
-      }
+      if (isListening && recognition) recognition.start();
     };
 
     await a.play().catch(()=>{});
@@ -346,18 +288,18 @@ async function speakText(text) {
   }
 }
 
-    window.addEventListener("load", () => {
-      setTimeout(() => {
-        if (messages.length === 0) {
-          parent.postMessage("open-widget", "*");
-          const welcomeMessage = "Давай подскажу";
-          appendMessage(welcomeMessage, false);
-          messages.push({ role: "assistant", content: welcomeMessage });
-          parent.postMessage("show-notify", "*");
-        }
-      }, 10000);
-    });
-  </script>
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    if (messages.length === 0) {
+      parent.postMessage("open-widget", "*");
+      const welcomeMessage = "Давай подскажу";
+      appendMessage(welcomeMessage, false);
+      messages.push({ role: "assistant", content: welcomeMessage });
+      parent.postMessage("show-notify", "*");
+    }
+  }, 10000);
+});
+</script>
 
   <!-- Триггер для открытия формы -->
   <a id="triggerForm" href="#popup:subscription" style="display: none;">Открыть форму</a>
