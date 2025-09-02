@@ -200,27 +200,23 @@ fetch(OPENAI_PROXY_URL, {
     }
 
     function appendMessage(text, isUser) {
-      const msg = document.createElement("div");
-      msg.className = "message " + (isUser ? "from-user" : "from-bot");
+  const msg = document.createElement("div");
+  msg.className = "message " + (isUser ? "from-user" : "from-bot");
+  let display = text;
 
-      let display = text;
+  // 🔥 Триггер формы
+  if (!isUser && /\[openLeadForm\]/i.test(display)) {
+    parent.postMessage({ type: "open-form" }, "*");
+    display = display.replace(/\[openLeadForm\]/gi, "").trim();
+  }
 
-      // Триггер формы
-if (!isUser && /\[openLeadForm\]/i.test(display)) {
-  parent.postMessage("open-form", "*");
-  display = display.replace(/\[openLeadForm\]/gi, "").trim();
+  msg.innerHTML = isUser
+    ? `<span class='user-label'>Вы:</span> ${display}`
+    : `<span class='bot-label'>Анна:</span> ${display}`;
+
+  document.getElementById("chat").appendChild(msg);
+  chatBox.scrollTop = chatBox.scrollHeight;
 }
-
-      // Прячем служебные теги сцен из текста
-      display = display.replace(/\[(showCatalog|showCombo|confirmPay|showLoading|showThanks|reset)\]/gi, "").trim();
-
-      msg.innerHTML = isUser
-        ? `<span class='user-label'>Вы:</span> ${display}`
-        : `<span class='bot-label'>Анна:</span> ${display}`;
-
-      document.getElementById("chat").appendChild(msg);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
 
     function startTextVoice() {
       const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
