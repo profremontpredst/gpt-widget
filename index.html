@@ -230,18 +230,27 @@ micButton.addEventListener("click", () => {
       status.innerText = "🗣 " + text;
       messages.push({ role: "user", content: text });
 
-      const res = await fetch(OPENAI_PROXY_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages, userId, mode: widgetMode === "text" ? "voice" : widgetMode })
-      });
-      const data = await res.json();
-      const reply = data?.choices?.[0]?.message?.content || "Ошибка";
+      try {
+        const res = await fetch(OPENAI_PROXY_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages, userId, mode: widgetMode === "text" ? "voice" : widgetMode })
+        });
 
-      await handleFormTags(reply);
-      const voiceText = reply.replace(/\[openLeadForm\]/gi, "").trim();
-      messages.push({ role: "assistant", content: voiceText });
-      speakText(voiceText);
+        const data = await res.json();
+        const reply = data?.choices?.[0]?.message?.content || "Ошибка";
+
+        // 🔥 проверка на форму
+        if (reply.includes("[openLeadForm]") || data?.triggerForm) {
+          parent.postMessage({ type: "open-form" }, "*");
+        }
+
+        const voiceText = reply.replace(/\[openLeadForm\]/gi, "").trim();
+        messages.push({ role: "assistant", content: voiceText });
+        speakText(voiceText);
+      } catch (err) {
+        console.error("Ошибка GPT:", err);
+      }
     };
 
     recognition.onend = () => {};
