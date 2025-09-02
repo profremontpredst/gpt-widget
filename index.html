@@ -164,12 +164,17 @@ function sendMessage() {
   })
     .then(res => res.json())
     .then(async data => {
-      const gptMessage = data.choices?.[0]?.message?.content || "";
-      await handleFormTags(gptMessage);
-      appendMessage(gptMessage, false);
-      const cleanForHistory = gptMessage.replace(/\[openLeadForm\]/gi, "").trim();
-      messages.push({ role: "assistant", content: cleanForHistory });
-    })
+  const gptMessage = data.choices?.[0]?.message?.content || "";
+
+  // 🔥 проверка и по тексту, и по флагу triggerForm
+  if (data?.triggerForm || /\[openLeadForm\]/i.test(gptMessage)) {
+    parent.postMessage({ type: "open-form" }, "*");
+  }
+
+  appendMessage(gptMessage, false);
+  const cleanForHistory = gptMessage.replace(/\[openLeadForm\]/gi, "").trim();
+  messages.push({ role: "assistant", content: cleanForHistory });
+})
     .catch(error => console.error("❌ Ошибка при отправке запроса:", error));
 }
 
