@@ -6,22 +6,56 @@
   <title>Виджет Анна</title>
   <style>
     html, body {
-      margin: 0; padding: 0; height: 100%;
-      font-family: Arial, sans-serif; background: transparent; color: #333;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+      background: transparent;
+      color: #333;
     }
     .widget-container {
-      position: fixed; bottom: 20px; right: 20px; width: 360px; height: 580px;
-      background: rgba(255, 255, 255, 0.85); border-radius: 16px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3); display: flex; flex-direction: column;
-      overflow: hidden; z-index: 9999; backdrop-filter: blur(12px);
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 360px;
+      height: 580px;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 9999;
+      backdrop-filter: blur(12px);
     }
     @media (max-width: 768px) {
-      .widget-container { position: fixed !important; inset: 0 !important; width: 100vw !important; height: 100dvh !important; max-height: 100dvh !important; border-radius: 0 !important; }
+      .widget-container {
+        position: fixed !important;
+        inset: 0 !important;
+        width: 100vw !important;
+        height: 100dvh !important;
+        max-height: 100dvh !important;
+        border-radius: 0 !important;
+      }
     }
-    .tabs { display: flex; justify-content: center; background: linear-gradient(to right, #72c9ff, #0094ff); border-bottom: 1px solid #ccc; }
-    .tab { padding: 12px 16px; cursor: pointer; color: #fff; font-size: 14px; transition: background 0.2s; }
-    .tab.active { background: rgba(255,255,255,0.15); border-bottom: 2px solid #fff; color: #fff; }
-
+    .tabs {
+      display: flex;
+      justify-content: center;
+      background: linear-gradient(to right, #72c9ff, #0094ff);
+      border-bottom: 1px solid #ccc;
+    }
+    .tab {
+      padding: 12px 16px;
+      cursor: pointer;
+      color: #fff;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .tab.active {
+      background: rgba(255,255,255,0.15);
+      border-bottom: 2px solid #fff;
+      color: #fff;
+    }
     .chat-window { flex: 1; display: none; flex-direction: column; height: 100%; overflow: hidden; }
     .chat-window.active { display: flex; }
     .chat-box { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; justify-content: flex-end; }
@@ -40,14 +74,6 @@
     .mic-button svg { width: 30px; height: 30px; fill: white; }
     .chat-window, .chat-box { min-height: 0 !important; overflow-y: auto !important; }
     .widget-container { overflow: auto !important; }
-
-    /* быстрые подсказки */
-    .suggest-row { display:flex; gap:8px; padding:8px 10px 10px; background: rgba(255,255,255,0.75); border-bottom:1px solid #e8e8e8; flex-wrap:wrap; }
-    .suggest-btn {
-      font-size:12px; line-height:1; padding:8px 10px; border-radius:999px;
-      background:#eef6ff; color:#0d5ea6; border:1px solid #cfe6ff; cursor:pointer;
-    }
-    .suggest-btn:hover { background:#e1f0ff; }
   </style>
 </head>
 <body>
@@ -57,31 +83,7 @@
       <div class="tab" onclick="switchMode('voice')">Разговор</div>
     </div>
 
-    <!-- ВЕРХНИЙ БЛОК "Бесплатные юристы" -->
-    <section style="position:relative;width:100%;min-height:180px;background:#fff center/cover no-repeat url('https://i.imgur.com/k2Dpj2P.png');border-bottom:1px solid #e8e8e8;">
-      <div style="position:absolute;inset:0;padding:16px;display:flex;flex-direction:column;justify-content:center;gap:10px;background:rgba(255,255,255,0.55);backdrop-filter:blur(3px);">
-        <div style="font-weight:700;font-size:16px;color:#1e2a33;line-height:1.3;">Почему бесплатные юристы помогают не хуже, а иногда и лучше</div>
-        <ul style="margin:0;padding-left:18px;color:#31424d;font-size:13px;line-height:1.35;">
-          <li><b>Опыт и практика.</b> Бесплатный — не значит «без квалификации».</li>
-          <li><b>24/7.</b> Доступность в любое время суток.</li>
-          <li><b>Конкретные ответы.</b> Без лишней воды и «затягивания».</li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- ТЕКСТОВЫЙ ЧАТ -->
     <div class="chat-window active" id="text-chat">
-      <!-- шапка -->
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,0.8);border-bottom:1px solid #e8e8e8;backdrop-filter:blur(6px);">
-        <img src="https://i.imgur.com/VnE8ZUa.png" alt="Анна" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex:0 0 36px;">
-        <div style="font-weight:700;color:#0d5ea6;font-size:14px;">Здравствуйте! Я на связи. Консультант Анна.</div>
-      </div>
-      <!-- быстрые подсказки -->
-      <div class="suggest-row">
-        <button class="suggest-btn" onclick="quickAsk('Перезвоните мне')">перезвоните мне</button>
-        <button class="suggest-btn" onclick="quickAsk('Где вы находитесь?')">где вы находитесь</button>
-        <button class="suggest-btn" onclick="quickAsk('Вопрос по банкротству')">вопрос по банкротству</button>
-      </div>
       <div class="chat-box"><div id="chat"></div></div>
       <div class="chat-controls">
         <input class="chat-input" id="chatInput" type="text" placeholder="Введите сообщение..." />
@@ -89,17 +91,12 @@
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M476 3.8c-3.6-1.5-7.6-1.5-11.2 0L36.3 189.7c-5.9 2.4-9.8 8.1-9.8 14.3s3.9 11.9 9.8 14.3l138.3 57.6 57.6 138.3c2.4 5.9 8.1 9.8 14.3 9.8 6.2 0 11.9-3.9 14.3-9.8L508.2 47.2c3.7-8.7-.2-18.6-9.6-23.4z"/></svg>
         </button>
         <button onclick="startTextVoice()" title="Голосом">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M192 256c0 17.7-14.3 32-32 32s-32-14.3-32-32V128c0-17.7 14.3-32 32-32s32-14.3 32 32V256zM160 320c35.3 0 64-28.7 64-64V128a64 64 0 1 0-128 0V256c0 35.3 28.7 64 64 64zm56 32H104c-13.3 0-24 10.7-24 24s10.7 24 24 24h24v56c0 13.3 10.7 24 24 24s24-10.7 24-24V400h24c13.3 0 24-10.7 24-24s-10.7-24-24-24z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M192 256c0 17.7-14.3 32-32 32s-32-14.3-32-32V128c0-17.7 14.3-32 32-32s32 14.3 32 32V256zM160 320c35.3 0 64-28.7 64-64V128a64 64 0 1 0-128 0V256c0 35.3 28.7 64 64 64zm56 32H104c-13.3 0-24 10.7-24 24s10.7 24 24 24h24v56c0 13.3 10.7 24 24 24s24-10.7 24-24V400h24c13.3 0 24-10.7 24-24s-10.7-24-24-24z"/></svg>
         </button>
       </div>
     </div>
 
-    <!-- ГОЛОСОВОЙ ЧАТ -->
     <div class="chat-window" id="voice-chat">
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,0.8);border-bottom:1px solid #e8e8e8;backdrop-filter:blur(6px);">
-        <img src="https://i.imgur.com/VnE8ZUa.png" alt="Анна" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex:0 0 36px;">
-        <div style="font-weight:700;color:#0d5ea6;font-size:14px;">Здравствуйте! Я на связи. Консультант Анна.</div>
-      </div>
       <div id="voice-status">Нажмите на микрофон, чтобы начать</div>
       <div style="text-align:center;">
         <button class="mic-button" title="Говорить">
@@ -132,12 +129,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
-
-// быстрые подсказки
-function quickAsk(text){
-  chatInput.value = text;
-  sendMessage();
-}
 
 function switchMode(mode) {
   document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
@@ -173,17 +164,17 @@ function sendMessage() {
   })
     .then(res => res.json())
     .then(async data => {
-      const gptMessage = data.choices?.[0]?.message?.content || "";
+  const gptMessage = data.choices?.[0]?.message?.content || "";
 
-      // 🔥 проверка и по тексту, и по флагу triggerForm
-      if (data?.triggerForm || /\[openLeadForm\]/i.test(gptMessage)) {
-        parent.postMessage({ type: "open-form" }, "*");
-      }
+  // 🔥 проверка и по тексту, и по флагу triggerForm
+  if (data?.triggerForm || /\[openLeadForm\]/i.test(gptMessage)) {
+    parent.postMessage({ type: "open-form" }, "*");
+  }
 
-      appendMessage(gptMessage, false);
-      const cleanForHistory = gptMessage.replace(/\[openLeadForm\]/gi, "").trim();
-      messages.push({ role: "assistant", content: cleanForHistory });
-    })
+  appendMessage(gptMessage, false);
+  const cleanForHistory = gptMessage.replace(/\[openLeadForm\]/gi, "").trim();
+  messages.push({ role: "assistant", content: cleanForHistory });
+})
     .catch(error => console.error("❌ Ошибка при отправке запроса:", error));
 }
 
@@ -315,7 +306,7 @@ window.addEventListener("load", () => {
   setTimeout(() => {
     if (messages.length === 0) {
       parent.postMessage("open-widget", "*");
-      const welcomeMessage = "Здравствуйте! Я на связи. Консультант Анна.";
+      const welcomeMessage = "Давай подскажу";
       appendMessage(welcomeMessage, false);
       messages.push({ role: "assistant", content: welcomeMessage });
       parent.postMessage("show-notify", "*");
